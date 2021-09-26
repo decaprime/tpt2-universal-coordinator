@@ -1,47 +1,59 @@
 ﻿@page "/"
+@inject IJSRuntime JS
 
 <PageTitle>Universal Coordinator</PageTitle>
 
 <h1 class="text-5xl text-green-300 font-semibold">Universal Coordinator</h1>
 <h4 class="text-2xl font-light mb-2">Creates universal clicks from AI recordings for <a href="https://perfecttower2.com">The Perfect Tower 2</a></h4>
 <label class="block py-2 m-0 text-indigo-50 space-y-2">
-	<p>This utility outputs resolution independent click instructions. It expects a series of at least 3 recordings (made with F7 in game). Be as precise as possible by using erase/retry to attempt to click exact same area for each resolution.</p>
-	<p class="py-1">For each recording:</p>
+	<p>This utility outputs resolution independent click instructions given 3 or more in game AI recordings at different resolutions.</p>
+	<p class="py-1 font-semibold">Recording Instructions:</p>
 	<ol class="list-decimal list-inside">
-		<li>Resize window</li>
-		<li>Click top-right corner (this sets the recordings resolution)</li>
-		<li>Click same sequence of points</li>
+		<li>Press <kbd>F7</kbd> to start recording (must have scripts enabled <kbd>F4</kbd>)</li>
+		<li>Resize window to a new resolution</li>
+		<li>Click top-right most pixel (this records the current resolution)</li>
+		<li>Click a sequence of the positions using visual landmarks to relocate between resizes.</li>
+		<li>Press <kbd>F</kbd> to finish the recording</li>
 	</ol>
-	<p class="py-2 text-green-200 text-lg font-semibold">Input recordings, one per line:</p>
+	<p>Tip: Use <kbd>backspace</kbd> to undo unwanted clicks and to retry capturing clicks as precisely as possible.</p>
+	<p class="py-2 text-green-200 text-lg font-semibold">Exported recordings, one per line:</p>
 	<textarea @ref="inputArea" tabindex="0" class="bg-indigo-200 focus:ring-2 focus:ring-opacity-50 ring-0 focus:ring-indigo-300 text-indigo-900 p-2 w-full text-sm rounded-sm border-0 font-mono h-40" type="text" @bind="recordingValue" @onsubmit="Submit" />
 </label>
 <button class="my-2 px-4 py-2 font-semibold text-green-900 hover:text-green-800 bg-green-300 hover:bg-green-200 border-0 rounded-sm" @onclick="Submit">submit</button>
 
-@if (!string.IsNullOrWhiteSpace(error))
+@if (result?.Error != null)
 {
 	<h3 class="text-2xl my-2 text-red-300 font-semibold">Errors</h3>
-	<pre class="font-sans">@error</pre>
+	<pre class="font-sans">@result.Error</pre>
 }
-@if (!string.IsNullOrWhiteSpace(result))
+@if (result?.Warning != null)
+{
+	<h3 class="text-2xl my-2 text-yellow-300 font-semibold">Warnings</h3>
+	<pre class="font-sans">@result.Warning</pre>
+}
+@if (result?.Output != null)
 {
 	<h3 class="text-2xl my-2 text-green-300 font-semibold">Result</h3>
-	<pre class="font-mono p-3 bg-gray-800 text-gray-200 overflow-x-scroll rounded-sm">@result</pre>
+	<p class="mb-1">For use in a <a href="https://d0sboots.github.io/perfect-tower/">script editor</a></p>
+	<pre id="output" class="font-mono select-all p-3 bg-gray-800 text-gray-200 overflow-scroll h-80 rounded-sm w-full">@result.Output.AsScriptWithMacro.ReplaceLineEndings()</pre>
 }
+
 <footer class="border-t border-0 border-green-200 border-opacity-25 mt-4 p-2 text-right text-base font-light">
-	built by <a href="https://discord.com/users/115195745782464512">@@deca<span class="font-thin">#9999</span></a> with Blazor, <a href="https://github.com/decaprime/tpt2-universal-coordinator">open source</a>, inspired by d0sboots</footer>
+	built by <a href="https://discord.com/users/115195745782464512">@@deca<span class="font-thin">#9999</span></a> with Blazor, <a href="https://github.com/decaprime/tpt2-universal-coordinator">open source</a>, inspired by d0sboots
+</footer>
 
 @code {
 	ElementReference inputArea;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		await base.OnAfterRenderAsync(firstRender);
-		await inputArea.FocusAsync();
+		if (firstRender) await inputArea.FocusAsync();
 	}
 
 	string recordingValue;
-	string result, error;
+	RecordingParser.Result? result;
 	private void Submit()
 	{
-		(result, error) = RecordingParser.Parse(recordingValue);
+		result = RecordingParser.Parse(recordingValue);
 	}
 }
