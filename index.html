@@ -10,6 +10,16 @@
 </head>
 
 <body class="bg-indigo-900 text-green-100 mx-auto max-w-screen-lg md:w-4/5 w-5/6 p-8 pointer-events-auto">
+    <script>
+		window.selectContentById = (outputId) => {
+			var text = document.getElementById(outputId);
+            var selection = window.getSelection();
+            var range = document.createRange();
+			range.selectNodeContents(text);
+			selection.removeAllRanges();
+            selection.addRange(range);
+        };
+    </script>
     <div id="app">
         <div class="flex flex-col justify-center gap-4 items-center h-screen">
             <svg fill="#D1FAE5" class="w-16 h-16" viewBox="0 0 105 105">
