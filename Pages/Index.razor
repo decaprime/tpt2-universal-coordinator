@@ -3,10 +3,9 @@
 
 <PageTitle>Universal Coordinator</PageTitle>
 
-<h1 class="text-5xl text-green-300 font-semibold">Universal Coordinator</h1>
 <h4 class="text-2xl font-light mb-2">Creates universal clicks from AI recordings for <a href="https://perfecttower2.com">The Perfect Tower 2</a></h4>
 <label class="block py-2 m-0 text-indigo-50 space-y-2">
-	<p>This utility outputs resolution independent click instructions given 3 or more in game AI recordings at different resolutions.</p>
+	<p>This utility outputs resolution independent click instructions given 3 or more in game AI recordings at different resolutions. You can try <a href="/examples">examples.</a></p>
 	<p class="py-1 font-semibold">Recording Instructions:</p>
 	<ol class="list-decimal list-inside">
 		<li>Press <kbd>F7</kbd> to start recording (must have scripts enabled <kbd>F4</kbd>)</li>
@@ -37,10 +36,6 @@
 	<p class="mb-1">For use in a <a href="https://d0sboots.github.io/perfect-tower/">script editor</a></p>
 	<pre id="output" class="font-mono select-all p-3 bg-gray-800 text-gray-200 overflow-scroll h-80 rounded-sm w-full">@result.Output.AsScriptWithMacro.ReplaceLineEndings()</pre>
 }
-
-<footer class="border-t border-0 border-green-200 border-opacity-25 mt-4 p-2 text-right text-base font-light">
-	built by <a href="https://discord.com/users/115195745782464512">@@deca<span class="font-thin">#9999</span></a> with Blazor, <a href="https://github.com/decaprime/tpt2-universal-coordinator">open source</a>, inspired by d0sboots
-</footer>
 
 @code {
 	ElementReference inputArea;
