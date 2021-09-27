@@ -36,7 +36,7 @@
       "System.Runtime.dll": "sha256-4xJb1P9XmSK31GMVeo2OUtwLvu9Gys\/ylwRWPRnvm+c=",
       "System.Text.Encodings.Web.dll": "sha256-m9bT2x+B9O8W0RiY4RObIj24nk17mSX8HhorLB2I6nk=",
       "System.Text.Json.dll": "sha256-TvMdvEw55aDXAgSpMnHitC86aYWGt7xuEAhhndWwBxI=",
-      "tpt2-universal-coordinator.dll": "sha256-qOTBJiODXfIV8PmjcQLq3VeoknP2Xmb0Se2HCCn2vJs="
+      "tpt2-universal-coordinator.dll": "sha256-DAsQMappZ+UfQm1cboJgCmd4uhUonKFUQF9P1Qa6Yk0="
     },
     "extensions": null,
     "lazyAssembly": null,
