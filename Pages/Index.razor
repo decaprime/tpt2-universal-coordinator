@@ -33,11 +33,23 @@
 @if (result?.Output != null)
 {
 	<h3 class="text-2xl my-2 text-green-300 font-semibold">Result</h3>
-	<p class="mb-1">For use in a <a href="https://d0sboots.github.io/perfect-tower/">script editor</a></p>
-	<pre id="output" class="font-mono select-all p-3 bg-gray-800 text-gray-200 overflow-scroll h-80 rounded-sm w-full">@result.Output.AsScriptWithMacro.ReplaceLineEndings()</pre>
+	<div class="flex flex-col sm:flex-row justify-between">
+		<p class="py-1">For use in a <a href="https://d0sboots.github.io/perfect-tower/">script editor</a></p>
+		<div class="justify-self-end flex flex-row text-center">
+			<div class="flex-1 border-b-2 @OutputFormatClass(true) py-1 px-5 mx-0" @onclick="@(e => outputEnhanced = true)">enhanced</div>
+			<div class="flex-1 border-b-2 @OutputFormatClass(false) py-1 px-5 mx-0" @onclick="@(e => outputEnhanced = false)">simple</div>
+		</div>
+	</div>
+	<pre id="output" class="font-mono select-all p-3 bg-gray-800 text-gray-200 overflow-scroll h-80 rounded-sm w-full">
+		@(outputEnhanced ? result.Output.AsScriptWithMacro.ReplaceLineEndings() : result.Output.AsScript)
+	</pre>
 }
 
 @code {
+	bool outputEnhanced = true;
+	private string OutputFormatClass(bool isEnhanced) => isEnhanced == outputEnhanced
+														? "border-green-400 border-b-4 text-green-300 font-semibold cursor-default"
+														: "border-indigo-300 text-indigo-200 cursor-pointer hover:border-green-200 hover:text-green-100";
 	ElementReference inputArea;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
