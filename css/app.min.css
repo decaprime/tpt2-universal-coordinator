@@ -704,6 +704,11 @@ select {
   margin: 0px;
 }
 
+.mx-0 {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -732,10 +737,6 @@ select {
 
 .mt-8 {
   margin-top: 2rem;
-}
-
-.mb-1 {
-  margin-bottom: 0.25rem;
 }
 
 .mb-2 {
@@ -814,6 +815,10 @@ select {
   max-width: 1024px;
 }
 
+.flex-1 {
+  flex: 1 1 0%;
+}
+
 @-webkit-keyframes spin {
   to {
     transform: rotate(360deg);
@@ -885,6 +890,14 @@ select {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+.cursor-default {
+  cursor: default;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .select-all {
   -webkit-user-select: all;
      -moz-user-select: all;
@@ -907,6 +920,10 @@ select {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.flex-row {
+  flex-direction: row;
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -921,6 +938,10 @@ select {
 
 .justify-center {
   justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
 }
 
 .gap-4 {
@@ -947,6 +968,10 @@ select {
   --tw-divide-y-reverse: 0;
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
   border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
+}
+
+.justify-self-end {
+  justify-self: end;
 }
 
 .overflow-scroll {
@@ -981,6 +1006,10 @@ select {
   border-bottom-width: 2px;
 }
 
+.border-b-4 {
+  border-bottom-width: 4px;
+}
+
 .border-transparent {
   border-color: transparent;
 }
@@ -996,6 +1025,21 @@ select {
 }
 
 .border-green-200 {
+  --tw-border-opacity: 1;
+  border-color: rgba(167, 243, 208, var(--tw-border-opacity));
+}
+
+.border-green-400 {
+  --tw-border-opacity: 1;
+  border-color: rgba(52, 211, 153, var(--tw-border-opacity));
+}
+
+.border-indigo-300 {
+  --tw-border-opacity: 1;
+  border-color: rgba(165, 180, 252, var(--tw-border-opacity));
+}
+
+.hover\:border-green-200:hover {
   --tw-border-opacity: 1;
   border-color: rgba(167, 243, 208, var(--tw-border-opacity));
 }
@@ -1095,6 +1139,11 @@ select {
   padding-right: 1rem;
 }
 
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
 .px-6 {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
@@ -1127,6 +1176,10 @@ select {
 
 .pl-8 {
   padding-left: 2rem;
+}
+
+.text-center {
+  text-align: center;
 }
 
 .text-right {
@@ -1237,11 +1290,6 @@ select {
   color: rgba(252, 211, 77, var(--tw-text-opacity));
 }
 
-.text-green-100 {
-  --tw-text-opacity: 1;
-  color: rgba(209, 250, 229, var(--tw-text-opacity));
-}
-
 .text-green-200 {
   --tw-text-opacity: 1;
   color: rgba(167, 243, 208, var(--tw-text-opacity));
@@ -1262,6 +1310,11 @@ select {
   color: rgba(238, 242, 255, var(--tw-text-opacity));
 }
 
+.text-indigo-200 {
+  --tw-text-opacity: 1;
+  color: rgba(199, 210, 254, var(--tw-text-opacity));
+}
+
 .text-indigo-600 {
   --tw-text-opacity: 1;
   color: rgba(79, 70, 229, var(--tw-text-opacity));
@@ -1270,6 +1323,11 @@ select {
 .text-indigo-900 {
   --tw-text-opacity: 1;
   color: rgba(49, 46, 129, var(--tw-text-opacity));
+}
+
+.hover\:text-green-100:hover {
+  --tw-text-opacity: 1;
+  color: rgba(209, 250, 229, var(--tw-text-opacity));
 }
 
 .hover\:text-green-800:hover {
@@ -1443,6 +1501,9 @@ kbd {
 }
 
 @media (min-width: 640px) {
+  .sm\:flex-row {
+    flex-direction: row;
+  }
 }
 
 @media (min-width: 768px) {
