@@ -1,11 +1,15 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.WebUtilities;
+@using Microsoft.Extensions.Primitives;
+@using Microsoft.JSInterop.Implementation
 @inject IJSRuntime JS
+@inject NavigationManager navManager
 
 <PageTitle>Universal Coordinator</PageTitle>
 
 <h4 class="text-2xl font-light mb-2">Creates universal clicks from AI recordings for <a href="https://perfecttower2.com">The Perfect Tower 2</a></h4>
 <label class="block py-2 m-0 text-indigo-50 space-y-2">
-	<p>This utility outputs resolution independent click instructions given 3 or more in game AI recordings at different resolutions. You can try <a href="/examples">examples.</a></p>
+	<p>This utility outputs a resolution independent click script given 3 or more in-game AI recordings at different resolutions. You can try <a href="/examples">examples.</a></p>
 	<p class="py-1 font-semibold">Recording Instructions:</p>
 	<ol class="list-decimal list-inside">
 		<li>Press <kbd>F7</kbd> to start recording (must have scripts enabled <kbd>F4</kbd>)</li>
@@ -15,11 +19,14 @@
 		<li>Press <kbd>F</kbd> to finish the recording</li>
 	</ol>
 	<p>Tip: Use <kbd>backspace</kbd> to undo unwanted clicks and to retry capturing clicks as precisely as possible.</p>
-	<p class="py-2 text-green-200 text-lg font-semibold">Exported recordings, one per line:</p>
-	<textarea @ref="inputArea" tabindex="0" class="bg-indigo-200 focus:ring-2 focus:ring-opacity-50 ring-0 focus:ring-indigo-300 text-indigo-900 p-2 w-full text-sm rounded-sm border-0 font-mono h-40" type="text" @bind="recordingValue" @onsubmit="Submit" />
+	<p class="py-2 text-green-200 text-lg font-semibold">Exported recordings, one per line (<a href="#" @onclick="TrySample1">try sample</a>):</p>
+	<textarea @ref="inputArea" tabindex="0" class="bg-indigo-200 focus:ring-2 focus:ring-opacity-50 ring-0 focus:ring-indigo-300 text-indigo-900 p-2 w-full text-sm rounded-sm border-0 font-mono h-40" type="text" @bind="recordingValue" @bind:event="oninput" @onsubmit="Submit" />
 </label>
 <button class="my-2 px-4 py-2 font-semibold text-green-900 hover:text-green-800 bg-green-300 hover:bg-green-200 border-0 rounded-sm" @onclick="Submit">submit</button>
-
+@if (string.IsNullOrWhiteSpace(recordingValue))
+{
+	<button class="my-2 px-4 py-2 border-0" @onclick="TrySample2">try sample</button>
+}
 @if (result?.Error != null)
 {
 	<h3 class="text-2xl my-2 text-red-300 font-semibold">Errors</h3>
@@ -35,21 +42,53 @@
 	<h3 class="text-2xl my-2 text-green-300 font-semibold">Result</h3>
 	<div class="flex flex-col sm:flex-row justify-between">
 		<p class="py-1">For use in a <a href="https://d0sboots.github.io/perfect-tower/">script editor</a></p>
-		<div class="justify-self-end flex flex-row text-center">
+		@if (inPreview && outputEnhanced && settingsOpen)
+		{
+			<EditForm Model="result.Output">
+				<label>
+					Variable
+					<InputText class="bg-indigo-200 focus:ring-2 focus:ring-opacity-50 ring-0 focus:ring-indigo-100 text-indigo-900 p-2 text-sm rounded-sm border-0 font-mono" @bind-Value="result.Output.IndexVariable" />
+				</label>
+				<label>
+					TabString
+					<InputText class="bg-indigo-200 focus:ring-2 ring-0 focus:ring-indigo-300 text-indigo-900 p-2 text-sm rounded-sm border-0 font-mono" @bind-Value="result.Output.TabCharacter" />
+				</label>
+			</EditForm>
+		}
+		<div class="justify-self-end flex flex-row text-center items-center">
+			@if (inPreview)
+			{
+				<div href="#" class="border-0" @onclick="@(e=> settingsOpen=!settingsOpen)"><SvgIcon Type="SvgIcon.IconType.Wrench" AddClasses="@IconFormatClass" /></div>
+			}
 			<div class="flex-1 border-b-2 @OutputFormatClass(true) py-1 px-5 mx-0" @onclick="@(e => outputEnhanced = true)">enhanced</div>
 			<div class="flex-1 border-b-2 @OutputFormatClass(false) py-1 px-5 mx-0" @onclick="@(e => outputEnhanced = false)">simple</div>
 		</div>
 	</div>
 	<pre id="output" class="font-mono select-all p-3 bg-gray-800 text-gray-200 overflow-scroll h-80 rounded-sm w-full">
 		@(outputEnhanced ? result.Output.AsScriptWithMacro.ReplaceLineEndings() : result.Output.AsScript)
-	</pre>
+								</pre>
 }
 
 @code {
 	bool outputEnhanced = true;
+	bool settingsOpen = false;
+	bool inPreview = false;
+	private string IconFormatClass => outputEnhanced
+														? "text-green-200 opacity-90 hover:text-green-400 hover:opacity-100"
+														: "opacity-50 pointer-normal text-indigo-300";
 	private string OutputFormatClass(bool isEnhanced) => isEnhanced == outputEnhanced
 														? "border-green-400 border-b-4 text-green-300 font-semibold cursor-default"
 														: "border-indigo-300 text-indigo-200 cursor-pointer hover:border-green-200 hover:text-green-100";
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		var uri = navManager.ToAbsoluteUri(navManager.Uri);
+
+		if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("preview", out var initCount))
+		{
+			bool.TryParse(initCount, out inPreview);
+		}
+	}
 	ElementReference inputArea;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -59,8 +98,33 @@
 
 	string recordingValue;
 	RecordingParser.Result? result;
-	private void Submit()
+
+	private async Task TrySample1() => await ExecuteAsync(1);	
+	private async Task TrySample2() => await ExecuteAsync(2);
+	private async Task Submit() => await ExecuteAsync(null);
+
+	private async Task ExecuteAsync(int? sample = null)
 	{
+		if (sample != null)
+		{
+			recordingValue = @"FFJlY29yZGluZyAoMTI6NDA6MzYpAAAAAAAAAAAVAAAADWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAGALRQAAlUQNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAYJZEAIAKRA1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQCAp0QAgApEDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAGC4RAAAC0QNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgMlEAMAKRA1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQDA2kQAwApEDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAACWRAAA0kMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgKdEAADPQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQCguEQAgNBDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAKDJRAAA0kMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgNpEAADRQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQAglkQAAI1DDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAGCnRAAAjEMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAYLhEAICMQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQCgyUQAgIxDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAMDaRACAikMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAQJZEAAAQQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQAgp0QAABBDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAGC4RAAAEEMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgMlEAAAQQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQCA2kQAAA9D
+FFJlY29yZGluZyAoMTI6NDI6MjkpAAAAAAAAAAAVAAAADWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFADAoRQCAm0QNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAoJxEAMAPRA1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQCArkQAgBBEDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAIDARACAEEQNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAQNJEAAAQRA1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQCA5EQAgA9EDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAICcRACA2kMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAoK5EAIDbQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQBgwEQAgNlDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFACDSRAAA2UMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUA4ONEAADZQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQDAnEQAgJJDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAMCuRAAAkkMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAYMBEAACSQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQAg0kQAgJNDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAADkRAAAk0MNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAwJxEAAAXQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQCgrkQAABZDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAEDARAAAFkMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgNJEAAAXQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQDA40QAABdD
+FFJlY29yZGluZyAoMTI6NDM6NTcpAAAAAAAAAAAVAAAADWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFANAfRQBArUQNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgK5EAAAhRA1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQBAwkQAwCBEDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAEDWRAAAIUQNZ2VuZXJpYy5jbGljawhjb25zdGFudAUA4OlEAAAhRA1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQAg/kQAACFEDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAGCuRACA8kMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgMJEAIDyQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQBg1kQAgPJDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAEDqRACA8UMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAAP5EAADyQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQBgrkQAAKNDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAKDCRACAokMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAYNZEAICjQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQAA6kQAAKNDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAAD+RAAAo0MNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAgK5EAAAoQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQBgwkQAACdDDWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFAEDWRAAAJkMNZ2VuZXJpYy5jbGljawhjb25zdGFudAUAQOpEAAAoQw1nZW5lcmljLmNsaWNrCGNvbnN0YW50BQAA/kQAACdD
+";
+		}
 		result = RecordingParser.Parse(recordingValue);
+		var Status = (result.Output, result.Warning, result.Error) switch
+		{
+			(not null, null, null) => "success",
+			(not null, not null, null) => "warning",
+			(_, _, not null) => "error",
+			_ => "unexpected"
+		};
+		await LogEvent("submit", new { Sample = sample, Status, Preview = inPreview });
+	}
+
+	private async Task LogEvent(string eventName, params object[] args)
+	{
+		await JS.InvokeVoidAsync("plausible", eventName, args);
 	}
 }

@@ -25,3 +25,9 @@ a {
 kbd {
 	@apply px-1 py-0.5 box-border bg-indigo-500 text-green-100 text-sm rounded ring-1 ring-indigo-800 border-b-2 border-l border-r border-indigo-700 hover:border-indigo-900 hover:border-t-2 hover:border-b-0;
 }
+
+.fa-primary{
+	fill: purple;
+	height:100px;
+	width:100px;
+}

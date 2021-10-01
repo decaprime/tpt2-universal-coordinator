@@ -10,19 +10,28 @@ public class RecordingParser
 	{
 		public string AsScript => string.Join(Environment.NewLine, Coordinates);
 
+		private string tc = "\t";
+		public string TabCharacter { get { return tc; } set { tc = value; } }
+
+		private const string DEFAULT_INDEX = "_ci";
+		public string IndexVariable { get; set; } = DEFAULT_INDEX;
+
+		private bool IsDefaultIndex => IndexVariable == DEFAULT_INDEX;
+
 		public string AsScriptWithMacro => $@"; Generated with https://universal-coordinator.deca.gg
-; Use by setting RENAME_ME_INDEX and calling this script or jumping to the label
-:global int RENAME_ME_INDEX
-:local int _ci
-_ci = RENAME_ME_INDEX
+; Use by setting {(IsDefaultIndex ? "RENAME_ME_INDEX" : IndexVariable)} and calling this script or jumping to the label 
+{(IsDefaultIndex ? @$"global int RENAME_ME_INDEX
+:local int {IndexVariable}
+{IndexVariable} = RENAME_ME_INDEX" :
+$":global int {IndexVariable}")}
 
 #rvec(wx,hx,wy,hy) vec(width.d()* {{wx}}+height.d()* {{hx}},width.d()* {{wy}}+height.d()* {{hy}})
 
 universal_click:
-	click(\
-{string.Join(Environment.NewLine, Coordinates.Select((c, i) => $"\t\tif(_ci == {i,2}, {c.RVec}, \\"))}
-    		vec(0.0,0.0){new(')', Coordinates.Count)} \
-	)
+{tc}click(\
+{string.Join(Environment.NewLine, Coordinates.Select((c, i) => $"{tc}{tc}if({IndexVariable} == {i,2}, {c.RVec}, \\"))}
+{tc}{tc}{tc}vec(0.0,0.0){new(')', Coordinates.Count)} \
+{tc})
 ";
 	}
 

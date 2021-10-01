@@ -9,7 +9,7 @@ module.exports = {
 	},
 	darkMode: "class",
 	variants: {
-		extend: { opacity: ['disabled'], borderWidth: ['hover']},
+		extend: { opacity: ['disabled'], borderWidth: ['hover'], animation: ['hover','active']},
 	},
 	plugins: [require('@tailwindcss/forms')],
 }
