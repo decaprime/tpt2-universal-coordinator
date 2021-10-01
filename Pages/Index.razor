@@ -123,8 +123,8 @@ FFJlY29yZGluZyAoMTI6NDM6NTcpAAAAAAAAAAAVAAAADWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFANAf
 		await LogEvent("submit", new { Sample = sample, Status, Preview = inPreview });
 	}
 
-	private async Task LogEvent(string eventName, params object[] args)
+	private async Task LogEvent(string eventName, object props)
 	{
-		await JS.InvokeVoidAsync("plausible", eventName, args);
+		await JS.InvokeVoidAsync("plausible", eventName, new { props });
 	}
 }
