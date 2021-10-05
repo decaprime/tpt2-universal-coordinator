@@ -17,4 +17,4 @@ Open to pull requests or suggestions.
 This is a .net 6.0 [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) WASM application. It uses [TailwindCSS](https://tailwindcss.com/) for styling. It's built with [this action](.github/workflows/main.yml) and deployed on github pages.
 
 ### License
-MIT see [LICENSE.md](LISCENSE.md)
+MIT see [LICENSE.md](LICENSE.md)
