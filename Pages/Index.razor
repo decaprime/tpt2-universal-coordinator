@@ -97,7 +97,7 @@
 
 	private async Task TrySample1() => await ExecuteAsync(1);	
 	private async Task TrySample2() => await ExecuteAsync(2);
-	private async Task Submit() => await ExecuteAsync(0);
+	private async Task Submit() => await ExecuteAsync();
 
 	private async Task ExecuteAsync(int? sample = null)
 	{
@@ -116,7 +116,7 @@ FFJlY29yZGluZyAoMTI6NDM6NTcpAAAAAAAAAAAVAAAADWdlbmVyaWMuY2xpY2sIY29uc3RhbnQFANAf
 			(_, _, not null) => "error",
 			_ => "unexpected"
 		};
-		await LogEvent("submit", new { Sample = sample, Status, Preview = inPreview });
+		await LogEvent("submit", new { Sample = sample ?? 0, Status, Preview = inPreview });
 	}
 
 	private async Task LogEvent(string eventName, object props)
